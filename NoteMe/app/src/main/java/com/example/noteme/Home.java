@@ -1,10 +1,12 @@
 package com.example.noteme;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.SearchView;
 
+import android.database.Cursor;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +23,8 @@ public class Home extends AppCompatActivity {
     private SearchView searchView;
     private FloatingActionButton addNoteButton;
 
+    private DatabaseHelper databaseHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,11 +34,20 @@ public class Home extends AppCompatActivity {
         searchView = findViewById(R.id.searchView);
         addNoteButton = findViewById(R.id.addNoteButton);
 
-        // Sample list of notes
+        databaseHelper = new DatabaseHelper(this);
+
+        Cursor cursor = databaseHelper.getAllEntries();
+
         List<Note> notes = new ArrayList<>();
-        notes.add(new Note("Meeting Notes", "Discuss the project timeline."));
-        notes.add(new Note("Grocery List", "Buy milk, eggs, and bread."));
-        notes.add(new Note("To-Do", "Complete Android app development."));
+        if (cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex("TITLE"));
+                @SuppressLint("Range") String subtitle = cursor.getString(cursor.getColumnIndex("SUBTITLE"));
+                @SuppressLint("Range") String content = cursor.getString(cursor.getColumnIndex("CONTENT"));
+                notes.add(new Note(title, content));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
 
         noteAdapter = new NoteAdapter(notes);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -63,4 +76,5 @@ public class Home extends AppCompatActivity {
             }
         });
     }
+
 }
