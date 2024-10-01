@@ -36,19 +36,7 @@ public class Home extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
-        Cursor cursor = databaseHelper.getAllEntries();
-
-        List<Note> notes = new ArrayList<>();
-        if (cursor.moveToFirst()) {
-            do {
-                @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex("TITLE"));
-                @SuppressLint("Range") String subtitle = cursor.getString(cursor.getColumnIndex("SUBTITLE"));
-                @SuppressLint("Range") String content = cursor.getString(cursor.getColumnIndex("CONTENT"));
-                notes.add(new Note(title, content));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-
+        List<Note> notes = getAllNotes();
         noteAdapter = new NoteAdapter(notes);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(noteAdapter);
@@ -62,7 +50,9 @@ public class Home extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                noteAdapter.filter(newText); // Filter notes as the user types
+                Cursor cursor = databaseHelper.searchNotes(newText);
+                List<Note> filteredNotes = getFilteredNotes(cursor);
+                noteAdapter.updateNotes(filteredNotes);
                 return false;
             }
         });
@@ -76,5 +66,46 @@ public class Home extends AppCompatActivity {
             }
         });
     }
+    private List<Note> getAllNotes() {
+        List<Note> notes = new ArrayList<>();
+        Cursor cursor = databaseHelper.getAllEntries();
+        if (cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex("TITLE"));
+                @SuppressLint("Range") String subtitle = cursor.getString(cursor.getColumnIndex("SUBTITLE"));
+                @SuppressLint("Range") String content = cursor.getString(cursor.getColumnIndex("CONTENT"));
+                notes.add(new Note(title, content));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return notes;
+    }
+
+    private List<Note> getFilteredNotes(Cursor cursor) {
+        List<Note> filteredNotes = new ArrayList<>();
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                // Step 1: Check if cursor contains valid column indexes
+                int titleIndex = cursor.getColumnIndex("title");
+                int contentIndex = cursor.getColumnIndex("content");
+
+                // Step 2: Safeguard against column not found (returns -1 if not found)
+                if (titleIndex != -1 && contentIndex != -1) {
+                    String title = cursor.getString(titleIndex);
+                    String content = cursor.getString(contentIndex);
+
+                    // Step 3: Check for null values
+                    if (title != null && content != null) {
+                        filteredNotes.add(new Note(title, content));
+                    }
+                }
+            } while (cursor.moveToNext());
+        }
+        if (cursor != null) {
+            cursor.close(); // Always close the cursor when done
+        }
+        return filteredNotes;
+    }
+
 
 }

@@ -41,6 +41,9 @@ public class NewNote extends AppCompatActivity {
                 else {
                     Toast.makeText(NewNote.this, "Something went wrong", Toast.LENGTH_SHORT).show();
                 }
+
+                Intent intent = new Intent(NewNote.this, Home.class);
+                startActivity(intent);
             }
         });
 

@@ -35,6 +35,12 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         holder.content.setText(note.getContent());
     }
 
+    public void updateNotes(List<Note> newNotes) {
+        this.noteList.clear();        // Clear old notes
+        this.noteList.addAll(newNotes); // Add new notes
+        notifyDataSetChanged();       // Notify the adapter to refresh the RecyclerView
+    }
+
     @Override
     public int getItemCount() {
         return filteredNoteList.size();

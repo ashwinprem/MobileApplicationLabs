@@ -73,4 +73,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.delete(TABLE_NAME, "ID=?", new String[]{id});
     }
 
+    public Cursor searchNotes(String filter){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String query = "SELECT * FROM TABLE_NAME " +
+                        "WHERE TITLE LIKE %" + filter +
+                        "% OR SUBTITLE LIKE %" + filter +
+                        "$ OR BODY LIKE %" + filter + "%";
+
+        Cursor cursor = db.rawQuery(query, null);
+        return cursor;
+
+    }
+
 }
