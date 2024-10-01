@@ -85,11 +85,9 @@ public class Home extends AppCompatActivity {
         List<Note> filteredNotes = new ArrayList<>();
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                // Step 1: Check if cursor contains valid column indexes
                 int titleIndex = cursor.getColumnIndex("title");
                 int contentIndex = cursor.getColumnIndex("content");
 
-                // Step 2: Safeguard against column not found (returns -1 if not found)
                 if (titleIndex != -1 && contentIndex != -1) {
                     String title = cursor.getString(titleIndex);
                     String content = cursor.getString(contentIndex);
